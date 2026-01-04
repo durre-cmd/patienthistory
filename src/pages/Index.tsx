@@ -19,6 +19,7 @@ import { StudentSetup } from '@/components/StudentSetup';
 import { useCases } from '@/hooks/useCases';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { exportCasesToPDF } from '@/lib/pdfExport';
+import { WelcomeBack } from '@/components/WelcomeBack';
 import { useToast } from '@/hooks/use-toast';
 import { PatientCase } from '@/types/case';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -51,6 +52,7 @@ const isCollapsed = scrollY > 8; // FAST iOS-style collapse
   
   
   const [studentName, setStudentName] = useLocalStorage('student-name', '');
+   const [hasSeenWelcome, setHasSeenWelcome] = useState(false);
  
   
 
@@ -84,7 +86,17 @@ const isCollapsed = scrollY > 8; // FAST iOS-style collapse
     }
   };
 
-  
+    useEffect(() => {
+    const sessionWelcome = sessionStorage.getItem('has-seen-welcome');
+    if (sessionWelcome === 'true') {
+      setHasSeenWelcome(true);
+    }
+  }, []);
+
+  const handleContinue = () => {
+    sessionStorage.setItem('has-seen-welcome', 'true');
+    setHasSeenWelcome(true);
+  };
 
   const filteredCases = useMemo(() => {
     return searchCases(searchQuery).sort(
@@ -148,6 +160,10 @@ const isCollapsed = scrollY > 8; // FAST iOS-style collapse
     return <StudentSetup onComplete={setStudentName} />;
   }
 
+  // Show welcome back screen for returning users (once per session)
+  if (!hasSeenWelcome) {
+    return <WelcomeBack studentName={studentName} onContinue={handleContinue} />;
+  }
  
 
   return (
