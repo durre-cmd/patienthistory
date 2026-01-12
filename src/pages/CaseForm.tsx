@@ -100,7 +100,7 @@ export default function CaseForm() {
   const isFemale = formData.gender === 'Female';
 
   return (
-    <div className="min-h-screen bg-background">
+ <div className="min-h-screen bg-background text-[103%] [&_*]:text-[97%] [&_input]:h-10.75 [&_label]:mb-2 [&_.space-y-1]:space-y-3 [&_.grid]:gap-y-6">
       {/* Header - Compact for mobile */}
       <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-md border-b border-border">
         <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between">

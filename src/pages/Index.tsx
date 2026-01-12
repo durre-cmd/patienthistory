@@ -266,20 +266,24 @@ const isCollapsed = scrollY > 8; // FAST iOS-style collapse
 
     {/* SEARCH — SAME MOTION AS NAME */}
    <motion.div
-  animate={{   y: isCollapsed ? -1 : 0, }}   // smaller movement
-  transition={{ duration: 0.3,
-    ease: "easeInOut", }}
+  animate={{ 
+    // marginTop physically pulls the element up
+    marginTop: isCollapsed ? "-1px" : "0px", 
+  }} 
+  transition={{ 
+    duration: 0.15, // Snappy speed
+    ease: "linear", // Consistent speed
+  }}
   className="relative"
 >
-
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-      <Input
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        placeholder="Search by ID, name, complaint, or diagnosis…"
-        className="pl-9 h-9 bg-secondary/50 placeholder:text-sm sm:placeholder:text-sm focus:outline-none focus:ring-0 w-full"
-      />
-    </motion.div>
+  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+  <Input
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    placeholder="Search by ID, name, complaint, or diagnosis…"
+    className="pl-9 h-9 bg-secondary/50 placeholder:text-sm sm:placeholder:text-sm focus:outline-none focus:ring-0 w-full"
+  />
+</motion.div>
   </motion.div>
 </header>
 
@@ -287,64 +291,66 @@ const isCollapsed = scrollY > 8; // FAST iOS-style collapse
 
       {/* Selection Bar & Main Content (unchanged) */}
       <AnimatePresence>
-        {isSelecting && (
-          <motion.div
-            initial={{ y: -50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -50, opacity: 0 }}
-            className="sticky top-[105px] z-10 bg-primary text-primary-foreground py-2 px-4"
+  {isSelecting && (
+    <motion.div
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -20, opacity: 0 }}
+      /* 1. top-[92px]: Moved up from 105px to hit that 'half a cm' gap.
+        2. py-1.5: Makes the bar thinner/smaller.
+        3. bg-primary/95: Slight transparency for a modern look.
+      */
+      className="sticky top-[92px] z-10 bg-primary/95 backdrop-blur-sm text-primary-foreground py-1.5 px-4 shadow-md transition-all"
+    >
+      <div className="max-w-4xl mx-auto flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Checkbox
+            checked={
+              selectedCases.size === filteredCases.length &&
+              filteredCases.length > 0
+            }
+            onCheckedChange={toggleSelectAll}
+            className="h-4 w-4 border-primary-foreground/50 data-[state=checked]:bg-primary-foreground data-[state=checked]:text-primary"
+          />
+          {/* text-xs makes the text fit the smaller bar better */}
+          <span className="text-xs font-medium">
+            {selectedCases.size} of {filteredCases.length} selected
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportSelected}
+            disabled={selectedCases.size === 0}
+            /* h-7 and text-xs makes the button compact */
+            className={`h-7 text-xs transition-all duration-75 border-border !opacity-100 ${
+              selectedCases.size > 0
+                ? 'bg-[#04AA6D] !text-white border-[#04AA6D]'
+                : 'bg-white !text-black border-gray-300'
+            }`}
           >
-            <div className="max-w-4xl mx-auto flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Checkbox
-                  checked={
-                    selectedCases.size === filteredCases.length &&
-                    filteredCases.length > 0
-                  }
-                  onCheckedChange={toggleSelectAll}
-                  className="border-primary-foreground/50 data-[state=checked]:bg-primary-foreground data-[state=checked]:text-primary"
-                />
-                <span className="text-sm">
-                  {selectedCases.size} of {filteredCases.length} selected
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleExportSelected}
-                  disabled={selectedCases.size === 0}
-                  className={`transition-all duration-75 border-border !opacity-100 ${
-                    selectedCases.size > 0
-                      ? 'bg-[#04AA6D] !text-white border-[#04AA6D] hover:bg-[#04AA6D]'
-                      : 'bg-white !text-black hover:bg-white border-gray-300'
-                  }`}
-                >
-                  <Download
-                    className={`w-4 h-4 mr-2 !opacity-100 ${
-                      selectedCases.size > 0 ? 'text-white' : 'text-black'
-                    }`}
-                  />
-                  <span className="!opacity-100">Export Selected</span>
-                </Button>
+            <Download className="w-3.5 h-3.5 mr-1.5" />
+            <span>Export</span>
+          </Button>
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setIsSelecting(false);
-                    setSelectedCases(new Set());
-                  }}
-                  className="text-white hover:bg-red-600 hover:text-white transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              setIsSelecting(false);
+              setSelectedCases(new Set());
+            }}
+            className="h-7 w-7 text-white hover:bg-white/20"
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
       {/* Main content and cases list - unchanged */}
       <main className="max-w-4xl mx-auto px-4 py-6">
         {cases.length === 0 ? (
